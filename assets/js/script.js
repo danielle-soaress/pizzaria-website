@@ -3,6 +3,7 @@ let quantityPizzas = 1;
 let pizzaKey = 0;
 
 
+
 const itemModel = document.querySelector('.pizza-item')
 const pizzasContainer = document.querySelector('.pizza-area')
 const windowArea = document.querySelector('.pizzaWindowArea')
@@ -70,9 +71,9 @@ function changeQuantity(info) {
     let quantityDiv = c('.pizzaInfo--qt')
 
     if (info === 'remove') {
-        if (quantity == 1) {
+        if (quantityPizzas == 1) {
             window.alert('A quantidade mínima é 1.')
-        } else if (quantity > 1) {
+        } else if (quantityPizzas > 1) {
             quantityPizzas--
             quantityDiv.innerHTML = quantityPizzas
         }
@@ -80,6 +81,8 @@ function changeQuantity(info) {
         quantityPizzas++
         quantityDiv.innerHTML = quantityPizzas
     }
+
+    updateCart()
 }
 
 // fechando a janela 
@@ -101,7 +104,7 @@ c('.pizzaInfo--addButton').addEventListener('click', () => {
 
     for (let i=0; i<3; i++) {
         if(sizesDiv.children[i].classList.contains('selected')) {
-            size = sizesDiv.children[i].getAttribute('id')
+            size = sizesDiv.children[i].getAttribute('data-key')
         }
     }
 
@@ -114,14 +117,100 @@ c('.pizzaInfo--addButton').addEventListener('click', () => {
     } else {
         cart.push({
             id: pizzaJson[pizzaKey].id,
+            key: pizzaKey,
             size: size,
             qt: quantityPizzas,
             identifier: identifier
         })
     }
 
-    console.log(cart)
-
+    updateCart()
     closeWindow()
 })
 
+// mostrando o menu
+
+const cartDiv = c('.cart')
+
+function updateCart() {
+    c('.menu-openner span').innerHTML = cart.length;
+
+    if(cart.length>0) {
+        c('aside').classList.add('show')
+        cartDiv.innerHTML = ''
+        for (let i in cart) {
+            let item = cart[i]
+            let index = item.key
+            
+            subtotal = 0
+            subtotal += pizzaJson[index].price * item.qt
+            
+            let itemDiv = c('.cart--item').cloneNode(true)
+            itemDiv.children[0].setAttribute('src', `${pizzaJson[index].img}`)
+
+            let pizzaName = ''
+            switch(item.size) {
+                case '0':
+                    pizzaName = `${pizzaJson[index].name} (P)`
+                    break
+                
+                case '1':
+                    pizzaName = `${pizzaJson[index].name} (M)`
+                    break
+                
+                case '2':
+                    pizzaName = `${pizzaJson[index].name} (G)`
+                    break
+                
+                default:
+                    pizzaName = pizzaJson[index].name
+                    break
+            }
+
+            itemDiv.children[1].innerHTML = pizzaName
+            
+            itemDiv.querySelector('.cart--item--qt').innerHTML = `${item.qt}`
+            
+            itemDiv.querySelector('.cart--item-qtmenos').addEventListener ('click', () =>{
+                if (item.qt > 1) {
+                    item.qt--
+                } else if (item.qt == 1) {
+                    cart.splice(i, 1);
+                }
+                updateCart()
+            })
+            
+            itemDiv.querySelector('.cart--item-qtmais').addEventListener ('click', () => {
+                item.qt++
+                updateCart()
+            })
+
+            let desconto = 0.1*subtotal
+            let total = subtotal - desconto;
+
+            c('.subtotal').children[1].innerHTML = `R$ ${subtotal.toFixed(2)}`
+            c('.total').children[1].innerHTML = `R$ ${total.toFixed(2)}`
+            c('.desconto').children[1].innerHTML = `R$ ${desconto.toFixed(2)}`
+
+
+            cartDiv.appendChild(itemDiv)
+        }
+    } else {
+        subtotal = 0
+        c('aside').classList.remove('show')
+        c('aside').style.left = '100vw';
+    }
+
+}
+
+// abrindo o menu no celular
+
+c('.menu-openner').addEventListener('click', () => {
+    if(cart.length>0) {
+        c('aside').style.left='0'
+    }
+})
+
+c('.menu-closer').addEventListener('click', () => {
+    c('aside').style.left = '100vw';
+})

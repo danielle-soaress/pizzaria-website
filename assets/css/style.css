@@ -51,6 +51,7 @@ aside {
     font-family:'Hepta Slab', Helvetica, Arial;
     transition:all ease .2s;
     overflow-x:hidden;
+    overflow-y: hidden;
 }
 aside.show {
     width:30vw;
@@ -379,6 +380,7 @@ h1 {
 
     .menu-closer {
         display:block;
+        margin-bottom: 30px;
     }
 
     .pizzaWindowArea {
